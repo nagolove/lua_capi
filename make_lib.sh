@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 #gcc -shared -o libwrapper.so wrapper.c \
-gcc -shared -o wrapper.so wrapper.c \
+#gcc -shared -o wrapper.so wrapper.c \
+gcc -shared -o wrapper17.so wrapper.c \
     -g \
     -std=c99 \
     -I ~/projects/Chipmunk2D/include/ \

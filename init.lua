@@ -1,4 +1,4 @@
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local math = _tl_compat and _tl_compat.math or math; print('hello. I scene from separated thread')
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local math = _tl_compat and _tl_compat.math or math; local pcall = _tl_compat and _tl_compat.pcall or pcall; print('hello. I scene from separated thread')
 
 
 require("love")
@@ -8,32 +8,38 @@ require('pipeline')
 
 
 love.filesystem.setRequirePath("?.lua;?/init.lua;scenes/lua_capi/?.lua")
+local cpath = love.filesystem.getCRequirePath()
+love.filesystem.setCRequirePath(love.filesystem.getCRequirePath() .. ";scenes/lua_capi/?.so")
 
 
+print('getCRequirePath()', love.filesystem.getCRequirePath())
 
-
-
-
-
-
-
-
-
-
-
-
+local colorize = require('ansicolors2').ansicolors
 
 
 local event_channel = love.thread.getChannel("event_channel")
-
-
-
 
 local mx, my = 0, 0
 
 local last_render
 
 local pipeline = Pipeline.new()
+
+
+
+local function test_capi()
+   local ok, errmsg = pcall(function()
+      local wrp = require("wrapper17")
+      error('fuck')
+
+
+   end)
+   if not ok then
+      print(colorize("%{green}test_capi " .. "%{red}" .. errmsg))
+   end
+end
+
+test_capi()
 
 
 
@@ -79,7 +85,6 @@ end
 
 local function mainloop()
    while true do
-
       local events = event_channel:pop()
       if events then
          for _, e in ipairs(events) do
@@ -114,8 +119,6 @@ local function mainloop()
 
          render()
       end
-
-
 
 
 

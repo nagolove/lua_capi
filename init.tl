@@ -8,7 +8,13 @@ require 'pipeline'
 --require "love.timer"
 
 love.filesystem.setRequirePath("?.lua;?/init.lua;scenes/lua_capi/?.lua")
---local colorize = require 'ansicolors2'.ansicolors
+local cpath = love.filesystem.getCRequirePath()
+love.filesystem.setCRequirePath(love.filesystem.getCRequirePath() .. ";scenes/lua_capi/?.so")
+--love.filesystem.setCRequirePath(cpath .. ";./scenes/lua_capi/?.so")
+
+print('getCRequirePath()', love.filesystem.getCRequirePath())
+
+local colorize = require 'ansicolors2'.ansicolors
 --local format = string.format
 
 local event_channel = love.thread.getChannel("event_channel")
@@ -19,17 +25,17 @@ local last_render: number
 
 local pipeline = Pipeline.new()
 
-require 'wrapper'
+--require 'wrapper'
 
 local function test_capi()
     local ok, errmsg: boolean, string = pcall(function()
-        local wrapper = require "wrapper"
+        local wrp = require "wrapper17"
         error('fuck')
         --wrapper.samplest()
-        wrapper.ret_table()
+        --wrapper.ret_table()
     end)
     if not ok then
-        print(colorize("%{red}" .. errmsg))
+        print(colorize("%{green}test_capi " .. "%{red}" .. errmsg))
     end
 end
 
