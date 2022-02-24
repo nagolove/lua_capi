@@ -7,8 +7,7 @@ require('pipeline')
 
 
 
-love.filesystem.setRequirePath("?.lua;?/init.lua;scenes/empty_mt/?.lua")
-local i18n = require("i18n")
+love.filesystem.setRequirePath("?.lua;?/init.lua;scenes/lua_capi/?.lua")
 
 
 
@@ -44,20 +43,6 @@ local pipeline = Pipeline.new()
 
 
 local function init()
-   i18n.set('en.welcome', 'welcome to this program')
-   i18n.load({
-      en = {
-         good_bye = "good-bye!",
-         age_msg = "your age is %{age}.",
-         phone_msg = {
-            one = "you have one new message.",
-            other = "you have %{count} new messages.",
-         },
-      },
-   })
-   print("translated", i18n.translate('welcome'))
-   print("translated", i18n('welcome'))
-
    local rendercode = [[
     while true do
         local w, h = love.graphics.getDimensions()
@@ -70,19 +55,6 @@ local function init()
     ]]
    pipeline:pushCode('text', rendercode)
 
-   rendercode = [[
-    while true do
-        local y = graphic_command_channel:demand()
-        local x = graphic_command_channel:demand()
-        local rad = graphic_command_channel:demand()
-        love.graphics.setColor{0, 0, 1}
-        love.graphics.circle('fill', x, y, rad)
-
-        coroutine.yield()
-    end
-    ]]
-   pipeline:pushCode('circle_under_mouse', rendercode)
-
 
 
    pipeline:pushCode('clear', [[
@@ -93,19 +65,6 @@ local function init()
     end
     ]])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
    last_render = love.timer.getTime()
 end
 
@@ -113,15 +72,6 @@ local function render()
    pipeline:openAndClose('clear')
 
    pipeline:open('text')
-   pipeline:close()
-
-   local x, y = love.mouse.getPosition()
-   print('mouse x, y', x, y)
-   local rad = 50
-   pipeline:open('circle_under_mouse')
-   pipeline:push(y)
-   pipeline:push(x)
-   pipeline:push(rad)
    pipeline:close()
 
    pipeline:sync()

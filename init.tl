@@ -7,34 +7,33 @@ require 'pipeline'
 
 --require "love.timer"
 
-love.filesystem.setRequirePath("?.lua;?/init.lua;scenes/empty_mt/?.lua")
-local i18n = require "i18n"
+love.filesystem.setRequirePath("?.lua;?/init.lua;scenes/lua_capi/?.lua")
 --local colorize = require 'ansicolors2'.ansicolors
 --local format = string.format
 
---require "external"
---require "common"
-
---package.path = package.path .. ";scenes/automato/?.lua"
-
---local cam = require "camera".new()
---local gr = love.graphics
---local imgui = require "imgui"
---local inspect = require "inspect"
---local keyconfig = require "keyconfig"
---local next = next
---local timer = require "Timer"
-
 local event_channel = love.thread.getChannel("event_channel")
---local draw_ready_channel = love.thread.getChannel("draw_ready_channel")
---local graphic_command_channel = love.thread.getChannel("graphic_command_channel")
---local graphic_code_channel = love.thread.getChannel("graphic_code_channel")
 
 local mx, my = 0, 0
 
 local last_render: number
 
 local pipeline = Pipeline.new()
+
+require 'wrapper'
+
+local function test_capi()
+    local ok, errmsg: boolean, string = pcall(function()
+        local wrapper = require "wrapper"
+        error('fuck')
+        --wrapper.samplest()
+        wrapper.ret_table()
+    end)
+    if not ok then
+        print(colorize("%{red}" .. errmsg))
+    end
+end
+
+test_capi()
 
 -- Как часто перекомпилировать код рисовки?
 -- Варианты - 
@@ -44,20 +43,6 @@ local pipeline = Pipeline.new()
 -- потока.
 
 local function init()
-    i18n.set('en.welcome', 'welcome to this program')
-    i18n.load({
-        en = {
-            good_bye = "good-bye!",
-            age_msg = "your age is %{age}.",
-            phone_msg = {
-                one = "you have one new message.",
-                other = "you have %{count} new messages."
-            }
-        }
-    })
-    print("translated", i18n.translate('welcome'))
-    print("translated", i18n('welcome'))
-
     local rendercode = [[
     while true do
         local w, h = love.graphics.getDimensions()
@@ -70,19 +55,6 @@ local function init()
     ]]
     pipeline:pushCode('text', rendercode)
 
-    rendercode = [[
-    while true do
-        local y = graphic_command_channel:demand()
-        local x = graphic_command_channel:demand()
-        local rad = graphic_command_channel:demand()
-        love.graphics.setColor{0, 0, 1}
-        love.graphics.circle('fill', x, y, rad)
-
-        coroutine.yield()
-    end
-    ]]
-    pipeline:pushCode('circle_under_mouse', rendercode)
-
     -- Допустимо-ли переопределение функций? Или добавить специальный флаг?
     -- Нормально-ли использовать константы?
     pipeline:pushCode('clear', [[
@@ -93,19 +65,6 @@ local function init()
     end
     ]])
 
-    --[[
-    -- Добавлять-ли такую функцию? Будет использоваться?
-    -- Стоимость реализации и возможности применения.
-    pipeline:pushCodes({
-        { 
-            'text',
-            'code',
-        },
-        {},
-        {},
-    })
-    --]]
-
     last_render = love.timer.getTime()
 end
 
@@ -115,21 +74,11 @@ local function render()
     pipeline:open('text')
     pipeline:close()
 
-    local x, y = love.mouse.getPosition()
-    print('mouse x, y', x, y)
-    local rad = 50
-    pipeline:open('circle_under_mouse')
-    pipeline:push(y)
-    pipeline:push(x)
-    pipeline:push(rad)
-    pipeline:close()
-
     pipeline:sync()
 end
 
 local function mainloop()
     while true do
-        --print('mainloop iter')
         local events = event_channel:pop() as {any}
         if events then
             for _, e in ipairs(events) do
@@ -165,8 +114,6 @@ local function mainloop()
             render()
         end
         --]]
-
-        --render()
 
         --[[
         Ограничение кадров в секунду до 60
