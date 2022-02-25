@@ -100,16 +100,30 @@ static int average(lua_State *L)
  *}
  *
  */
+
+static int ret_table(lua_State *lua) {
+    printf("возвращает таблицу чисел\n");
+    lua_newtable(lua);
+    for(int i = 10; i >= 1; i--) {
+        /*lua_pushvalue(lua, i);*/
+        lua_pushnumber(lua, i);
+        lua_pushnumber(lua, i);
+        lua_settable(lua, -3);
+    }
+    return 1;
+}
+
 static int samplest(lua_State *lua) {
     printf("простейшая функция, без параметров\n");
     return 0;
 }
 
-extern int luaopen_wrapper(lua_State *lua) {
+extern int luaopen_wrapper17(lua_State *lua) {
     /*cpSpace *space = cpSpaceNew();*/
     static const struct luaL_Reg functions[] =
     {
          {"samplest", samplest},
+         {"ret_table", ret_table},
          {NULL, NULL}
     };
     /*luaL_newlib(lua, functions);*/

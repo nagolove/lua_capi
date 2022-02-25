@@ -9,6 +9,5 @@ gcc -shared -o wrapper17.so wrapper.c \
     -I /usr/include/lua5.1/ \
     -L ~/projects/Chipmunk2D/src \
     -fPIC \
-    -lchipmunk \
     -lluajit-5.1 
 #echo $?

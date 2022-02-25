@@ -9,7 +9,10 @@ require 'pipeline'
 
 love.filesystem.setRequirePath("?.lua;?/init.lua;scenes/lua_capi/?.lua")
 local cpath = love.filesystem.getCRequirePath()
-love.filesystem.setCRequirePath(love.filesystem.getCRequirePath() .. ";scenes/lua_capi/?.so")
+--love.filesystem.setCRequirePath(love.filesystem.getCRequirePath() .. ";scenes/lua_capi/?.so")
+love.filesystem.setCRequirePath("scenes/lua_capi/?.so;?.so")
+package.cpath = package.cpath .. ";./scenes/lua_capi/?.so"
+print('package.cpath', package.cpath)
 --love.filesystem.setCRequirePath(cpath .. ";./scenes/lua_capi/?.so")
 
 print('getCRequirePath()', love.filesystem.getCRequirePath())
@@ -26,13 +29,15 @@ local last_render: number
 local pipeline = Pipeline.new()
 
 --require 'wrapper'
+local inspect = require "inspect"
 
 local function test_capi()
     local ok, errmsg: boolean, string = pcall(function()
+        --require "wrapper17"
+        --local wrp = require "scenes.lua_capi.wrapper17"
         local wrp = require "wrapper17"
-        error('fuck')
-        --wrapper.samplest()
-        --wrapper.ret_table()
+        print('samplest', wrp.samplest())
+        print('ret_table', inspect(wrp.ret_table()))
     end)
     if not ok then
         print(colorize("%{green}test_capi " .. "%{red}" .. errmsg))

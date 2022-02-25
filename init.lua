@@ -1,4 +1,4 @@
-local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local math = _tl_compat and _tl_compat.math or math; local pcall = _tl_compat and _tl_compat.pcall or pcall; print('hello. I scene from separated thread')
+local _tl_compat; if (tonumber((_VERSION or ''):match('[%d.]*$')) or 0) < 5.3 then local p, m = pcall(require, 'compat53.module'); if p then _tl_compat = m end end; local ipairs = _tl_compat and _tl_compat.ipairs or ipairs; local math = _tl_compat and _tl_compat.math or math; local package = _tl_compat and _tl_compat.package or package; local pcall = _tl_compat and _tl_compat.pcall or pcall; print('hello. I scene from separated thread')
 
 
 require("love")
@@ -9,7 +9,10 @@ require('pipeline')
 
 love.filesystem.setRequirePath("?.lua;?/init.lua;scenes/lua_capi/?.lua")
 local cpath = love.filesystem.getCRequirePath()
-love.filesystem.setCRequirePath(love.filesystem.getCRequirePath() .. ";scenes/lua_capi/?.so")
+
+love.filesystem.setCRequirePath("scenes/lua_capi/?.so;?.so")
+package.cpath = package.cpath .. ";./scenes/lua_capi/?.so"
+print('package.cpath', package.cpath)
 
 
 print('getCRequirePath()', love.filesystem.getCRequirePath())
@@ -26,13 +29,15 @@ local last_render
 local pipeline = Pipeline.new()
 
 
+local inspect = require("inspect")
 
 local function test_capi()
    local ok, errmsg = pcall(function()
+
+
       local wrp = require("wrapper17")
-      error('fuck')
-
-
+      print('samplest', wrp.samplest())
+      print('ret_table', inspect(wrp.ret_table()))
    end)
    if not ok then
       print(colorize("%{green}test_capi " .. "%{red}" .. errmsg))
